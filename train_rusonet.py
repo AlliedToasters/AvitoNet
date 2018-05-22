@@ -57,7 +57,7 @@ def format_post(row):
     """Takes a row and formats it in a consistent manner
     for training and feature extraction."""
     #all fields denoted by newline
-    result = ''
+    result = '\n'
     result += row.region + '\n'
     result += row.city + '\n'
     result += row.parent_category_name + '\n'
@@ -148,7 +148,7 @@ def count_chunks(paths):
                 break
     return chunks
 
-def gen_batches(paths):
+def gen_batches(paths, num_bytes=1344):
     """Takes list of generators and yields batches."""
     gens = init_data_gen(paths)
     count = 0
@@ -157,7 +157,7 @@ def gen_batches(paths):
         for gen in gens:
             while True:
                 try:
-                    chunk, extra = get_chunk(gen, extra)
+                    chunk, extra = get_chunk(gen, extra, num_bytes=num_bytes)
                     yield chunk
                 except StopIteration:
                     break
@@ -389,8 +389,8 @@ if __name__ in "__main__":
     if cuda:
         torch.cuda.manual_seed(seed)
 
-    train_bg = gen_batches(train_paths)
-    val_bg = gen_batches(val_paths)
+    train_bg = gen_batches(train_paths, num_bytes=(seq_length+1)*batch_size)
+    val_bg = gen_batches(val_paths, num_bytes=(seq_length+1)*batch_size)
     
     n_batch = 'unknown'
     nv_batch = 'unknown'
